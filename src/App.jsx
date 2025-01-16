@@ -6,7 +6,6 @@ import { Toaster } from 'react-hot-toast'
 import ManageCards from './Pages/ManageCards/ManagecardsP'
 import CardDetails from './Pages/CardDetails/Carddetails'
 import Register from './components/register/Register'
-
 const App = () => {
   return (
     <>
