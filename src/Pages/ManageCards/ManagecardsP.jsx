@@ -5,7 +5,6 @@ import Info from '../../components/MobilebankingInfo/Info'
 import Header from '../../components/Dashbooard Header/Header'
 
 const ManagecardsP = () => {
-
     const [sidebarOpen, setSidebarOpen] = useState(false)
   return (
     <div className="flex h-screen font-hsbc">

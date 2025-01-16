@@ -35,10 +35,8 @@ export default function TransactionsTable() {
     setFilteredTransactions(filtered)
   }
 
-  // const totalAmount = filteredTransactions.reduce((sum, transaction) => sum + transaction.amount, 0)
- 
- 
-  // const totalLevy = filteredTransactions.reduce((sum, transaction) => sum + transaction.levy, 0)
+  const totalAmount = filteredTransactions.reduce((sum, transaction) => sum + transaction.amount, 0)
+  const totalLevy = filteredTransactions.reduce((sum, transaction) => sum + transaction.levy, 0)
 
   const convertSvgToDataUrl = (callback) => {
     const img = new Image()
@@ -195,8 +193,7 @@ export default function TransactionsTable() {
                 <th className="px-3 lg:px-6 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference Number</th>
                 <th className="px-3 lg:px-6 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deposit Amount</th>
                 <th className="px-3 lg:px-6 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deposit Date</th>
-                <th className="px-3 lg:px-6 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sort Code</th>
-                <th className="px-3 lg:px-6 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account Number</th>
+                <th className="px-3 lg:px-6 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DTL (10.7%)</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -205,17 +202,16 @@ export default function TransactionsTable() {
                   <td className="px-3 lg:px-6 py-2 lg:py-4 whitespace-nowrap text-sm">{transaction.description.split(': ')[1]}</td>
                   <td className="px-3 lg:px-6 py-2 lg:py-4 whitespace-nowrap text-sm text-blue-600">${transaction.amount.toFixed(2)}</td>
                   <td className="px-3 lg:px-6 py-2 lg:py-4 whitespace-nowrap text-sm">{transaction.transferDate}</td>
-                  <td className="px-3 lg:px-6 py-2 lg:py-4 whitespace-nowrap text-sm text-green-600">231486</td>
-                  <td className="px-3 lg:px-6 py-2 lg:py-4 whitespace-nowrap text-sm">15302980</td>
+                  <td className="px-3 lg:px-6 py-2 lg:py-4 whitespace-nowrap text-sm text-green-600">${transaction.levy.toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
-              {/* <tr className="bg-gray-50">
-                <td colSpan={3} className="px-3 lg:px-6 py-2 lg:py-4 text-right font-semibold text-sm">Total Amount (GBP)</td>
+              <tr className="bg-gray-50">
+                <td colSpan={2} className="px-3 lg:px-6 py-2 lg:py-4 text-right font-semibold text-sm">Total Amount (GBP)</td>
                 <td className="px-3 lg:px-6 py-2 lg:py-4 whitespace-nowrap text-blue-600 font-semibold text-sm">${totalAmount.toFixed(2)}</td>
                 <td className="px-3 lg:px-6 py-2 lg:py-4 whitespace-nowrap text-green-600 font-semibold text-sm">${totalLevy.toFixed(2)}</td>
-              </tr> */}
+              </tr>
             </tfoot>
           </table>
         </div>

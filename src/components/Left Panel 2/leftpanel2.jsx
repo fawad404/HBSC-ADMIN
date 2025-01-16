@@ -6,26 +6,27 @@ import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import Calculator from '../../assets/cal.svg';
 import Security from '../../assets/security.svg';
-import useAuthStore from '../../stores';
 
-// const userDatabase = {
-//   'user1': '+92 323 6792924',
-//   'user2': '+91 987 6543210'
-// };
+const userDatabase = {
+  'user1': '+92 323 6792924',
+  'user2': '+91 987 6543210'
+};
 
-const LeftPanel2 = ({ username, phoneNumber, setStep , userAuth}) => {
-  const { setAuthUser } = useAuthStore();
+const LeftPanel2 = ({ username, setStep }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-
+    if (username && userDatabase[username]) {
+      const phoneNumber = userDatabase[username];
+      setPhone(phoneNumber);
       console.log(`Selected user: ${username}, Phone number: ${phoneNumber}`);
       sendOtp(phoneNumber);
-    
-  }, [phoneNumber]);
+    }
+  }, [username]);
 
   const generateRecaptcha = () => {
     window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha', {
@@ -60,9 +61,8 @@ const LeftPanel2 = ({ username, phoneNumber, setStep , userAuth}) => {
       let confirmationResult = window.confirmationResult;
       confirmationResult.confirm(otp).then((result) => {
         let user = result.user;
-        setAuthUser(userAuth);
-        localStorage.setItem("currentUser", JSON.stringify(userAuth));
         console.log('OTP verified successfully', user);
+       
         navigate('/dashboard');
       }).catch((error) => {
         console.error('Failed to verify OTP', error);
@@ -73,7 +73,7 @@ const LeftPanel2 = ({ username, phoneNumber, setStep , userAuth}) => {
 
   return (
     <div className='flex flex-col gap-4'>
-      <h1 className="text-[#1a1f71] text-2xl">Security Check</h1>
+      <h1 className="text-[#1a1f71] text-2xl">Hello {username}</h1>
       <p className="text-sm">
         Not {username}?{' '}
         <button

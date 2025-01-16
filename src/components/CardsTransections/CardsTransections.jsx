@@ -7,7 +7,7 @@ import logo from '../../assets/pdf-logo.svg'
 import autoTable from 'jspdf-autotable'
 
 const transactionsByCard = {
-  '677c4b5171f69ff109617a03': [
+  1: [
     { transferDate: '24 June 2024', postingDate: '25 June 2024', description: 'Shopify', Reference: ' 628037', amount: 310.50, levy: 33.17 },
     { transferDate: '24 June 2024', postingDate: '25 June 2024', description: 'Shopify', Reference: ' 057371', amount: 439.00, levy: 46.87 },
     { transferDate: '23 June 2024', postingDate: '24 June 2024', description: 'Shopify', Reference: ' 129668', amount: 521.75, levy: 55.75 },
@@ -45,7 +45,7 @@ const getAllTransactions = () => {
     .slice(0, 10);
 };
 
-export default function CardsTransactions({ cardDetails, cardUser  }) {
+export default function CardsTransactions({ cardDetails }) {
   const { id } = useParams();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -151,18 +151,16 @@ export default function CardsTransactions({ cardDetails, cardUser  }) {
         // Add customer details with null check
         doc.setFontSize(11);
         doc.setFont('helvetica', 'normal');
-        if (cardDetails) {
-          doc.text(`${cardUser }`, padding, 70);
-          doc.text(`${cardDetails.address}`, padding, 80);
-        }
+        doc.text('AHMAD ASRAR ', padding, 70);
+        doc.text('10A Cranley Parade, SE9 4DZ', padding, 80);
 
         let startY = 115; // Default startY without card details
 
         // Only add card details if they exist
         if (cardDetails) {
-          doc.text(`Card Number: ${cardDetails.cardNumber}`, padding, 90);
+          doc.text(`Card Number: ${cardDetails.number}`, padding, 90);
           doc.text(`CVV: ${cardDetails.cvv}`, padding, 100);
-          doc.text(`Expiry: ${cardDetails.dd}/${cardDetails.mm}`, padding, 110);
+          doc.text(`Expiry: ${cardDetails.expiry}`, padding, 110);
           startY = 130; // Adjust startY when card details are present
         }
 
@@ -259,9 +257,9 @@ export default function CardsTransactions({ cardDetails, cardUser  }) {
             <thead>
               <tr className="bg-gray-100">
                 <th className="px-3 lg:px-6 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference Number</th>
-                <th className="px-3 lg:px-6 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th className="px-3 lg:px-6 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posting Date</th>
                 <th className="px-3 lg:px-6 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                <th className="px-3 lg:px-6 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transection Amount</th>
+                <th className="px-3 lg:px-6 py-2 lg:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -274,12 +272,13 @@ export default function CardsTransactions({ cardDetails, cardUser  }) {
                 </tr>
               ))}
             </tbody>
-            {/* <tfoot>
+            <tfoot>
               <tr className="bg-gray-50">
-                <td colSpan={3} className="px-3 lg:px-6 py-2 lg:py-4 text-right font-semibold text-sm">Total Amount (GBP)</td>
-                <td className="px-3 lg:px-6 py-2 lg:py-4 whitespace-nowrap text-blue-600 font-semibold text-sm">${totalAmount.toFixed(2)}</td>  
+                <td colSpan={2} className="px-3 lg:px-6 py-2 lg:py-4 text-right font-semibold text-sm">Total Amount (GBP)</td>
+                <td className="px-3 lg:px-6 py-2 lg:py-4 whitespace-nowrap text-blue-600 font-semibold text-sm">${totalAmount.toFixed(2)}</td>
+                <td className="px-3 lg:px-6 py-2 lg:py-4 whitespace-nowrap text-green-600 font-semibold text-sm">${totalLevy.toFixed(2)}</td>
               </tr>
-            </tfoot> */}
+            </tfoot>
           </table>
         </div>
       </div>

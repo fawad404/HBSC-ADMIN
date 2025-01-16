@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CreditCard, ChevronRight, Plus, Eye, EyeOff } from 'lucide-react';
-import useAuthStore from '../../stores';
 
 
 const Card = ({ children, className, onClick }) => (
-
   <div 
     className={`rounded-xl border border-gray-200 bg-white shadow-sm ${className}`}
     onClick={onClick}
@@ -24,22 +22,25 @@ const Button = ({ children, className, ...props }) => (
 );
 
 const ManageCards = () => {
-  const { authUser } = useAuthStore(); 
-  console.log(authUser?.user?.cards);
-  const [isVisible , setIsVisible] = useState(false);
   const navigate = useNavigate();
-  const [cards, setCards] = useState(authUser?.user?.cards || []);
+  const [cards, setCards] = useState([
+    { id: 1, number: "1265 7896 3658 75", cvv: "675", expiry: "06/26", isVisible: false, link: "#" },
+    { id: 2, number: "4532 8721 9012 3456", cvv: "123", expiry: "09/25", isVisible: false, link: "#" },
+    { id: 3, number: "5678 1234 5678 9012", cvv: "456", expiry: "12/24", isVisible: false, link: "#" },
+    { id: 4, number: "9012 3456 7890 1234", cvv: "789", expiry: "03/25", isVisible: false, link: "#" },
+    { id: 5, number: "3456 7890 1234 5678", cvv: "321", expiry: "08/26", isVisible: false, link: "#" },
+    { id: 6, number: "7890 1234 5678 9012", cvv: "654", expiry: "11/25", isVisible: false, link: "#" },
+  ]);
 
   const [showPopup, setShowPopup] = useState(false);
 
   const toggleCardVisibility = (id) => {
     setCards(cards.map(card => 
-      card._id === id ? { ...card, isVisible: !card.isVisible } : card
+      card.id === id ? { ...card, isVisible: !card.isVisible } : card
     ));
   };
 
   const maskNumber = (number) => {
-    if (!number) return "•••• •••• •••• ••••";
     return number.replace(/\d(?=\d{4})/g, "•");
   };
 
@@ -55,12 +56,11 @@ const ManageCards = () => {
     </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-      {Array.isArray(cards) && cards.length > 0 ? (
-        cards.map((card) => (
+        {cards.map((card) => (
           <Card
-            key={card._id}
+            key={card.id}
             className="group relative overflow-hidden bg-gradient-to-br from-white to-gray-50 hover:shadow-2xl transition-all duration-500 ease-out hover:-translate-y-2 cursor-pointer perspective-1000"
-            onClick={() => navigate(`/dashboard/manage-cards/${card._id}`)}
+            onClick={() => navigate(`/dashboard/manage-cards/${card.id}`)}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-[#db0011]/10 via-transparent to-[#db0011]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="p-6 relative transform transition-transform duration-500 group-hover:rotate-y-12">
@@ -70,7 +70,7 @@ const ManageCards = () => {
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleCardVisibility(card._id);
+                      toggleCardVisibility(card.id);
                     }}
                     className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors duration-300"
                   >
@@ -81,11 +81,11 @@ const ManageCards = () => {
               
               <div className="space-y-3">
                 <p className="font-mono text-xl tracking-wider">
-                  {card.isVisible ? card.cardNumber : maskNumber(card.cardNumber)}
+                  {card.isVisible ? card.number : maskNumber(card.number)}
                 </p>
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>CVV: {card.isVisible ? card.cvv : "•••"}</span>
-                  <span>Expiry: {card.dd}/{card.mm}</span>
+                  <span>Expiry: {card.expiry}</span>
                 </div>
               </div>
               
@@ -94,10 +94,7 @@ const ManageCards = () => {
               </div>
             </div>
           </Card>
-        ))
-      ) : (
-        <p className="text-center text-gray-500">No cards available</p>
-      )}
+        ))}
       </div>
 
       <div className="text-center">

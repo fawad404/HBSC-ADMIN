@@ -9,19 +9,12 @@ import Rightpanel2 from '../Right Panel 2/Rightpanel2';
 import Fscs from '../FSCS/Fscs';
 import Header from '../Header/Header';
 import Sorry from '../Sorry/Sorry';
-import Leftpass from '../Left Pass/Leftpass';
 
 export default function LoginPage() {
     const [step, setStep] = useState(1);
     const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [updatedEmail, setUpdatedEmail] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [usernameError, setUsernameError] = useState("");
-    const [passwordError, setPasswordError] = useState("");
-    const [auth, setAuth] = useState({});
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -31,78 +24,13 @@ export default function LoginPage() {
         return () => clearTimeout(timer);
     }, []);
 
-    const handleContinue = async (e) => {
+    const handleContinue = (e) => {
         e.preventDefault();
         if (username) {
-            try {
-                const response = await fetch('https://hsbc-backend.vercel.app/api/v1/auth/user-validation', {
-                    method: 'POST', 
-                    headers: {
-                        'Content-Type': 'application/json', 
-                    },
-                    body: JSON.stringify({ username }), 
-                });
-    
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('API Response:', data);
-                    if(data.blocked){
-                        setUsernameError("user is blocked please click on notify button!");
-                        return;
-                    }
-
-                    setStep(2); 
-                } else {
-                    console.error('API Error:', response.statusText);
-                    setUsernameError("invalid Username");
-                 
-                }
-            } catch (error) {
-                setUsernameError("Intenet Issue try reloading the page!");
-                console.error('Fetch Error:', error);
-
-                // Handle network or other errors
-            }
-        } else {
-            console.log('Username is required');
+            setStep(2);
+            setUsername(username); // Update the parent state
         }
     };
-
-    console.log(usernameError);
-    
-    const handlePasswordSubmit = async () => {
-        console.log("email for this user is:" , updatedEmail);
-        console.log("password is:", password);
-        console.log("phone number is:" , phoneNumber);
-        try {
-            const response = await fetch('https://hsbc-backend.vercel.app/api/v1/auth/signin', {
-                method: 'POST', 
-                headers: {
-                    'Content-Type': 'application/json', 
-                },
-                body: JSON.stringify({ username, password }), 
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setAuth(data);
-                console.log('login Response:', data);
-                console.log("phone number is :", data.user.phone);
-              
-                setPhoneNumber(data.user.phone);
-
-                setStep(3);
-            } else {
-                console.error('API Error:', response.statusText);
-                setPasswordError("invalid Password");
-               
-            }
-        } catch (error) {
-            console.error('Fetch Error:', error);
-           
-        }
-    };
-    console.log(auth? auth : '');
 
     if (loading) {
         return (
@@ -142,25 +70,19 @@ export default function LoginPage() {
                             {/* Left Panel */}
                             <div className="bg-white p-8 flex flex-col justify-between">
                                 {step === 1 ? (
-                                    <Leftpanel1 
+                                    <>
+                                     <Leftpanel1 
                                         username={username}
                                         setUsername={setUsername}
                                         rememberMe={rememberMe}
                                         setRememberMe={setRememberMe}
                                         handleContinue={handleContinue}
-                                        usernameError={usernameError}
-                                    />
-                                ) : step === 2 ? (
-                                    <Leftpass 
-                                        username={username} 
-                                        setStep={setStep}
-                                        setPassword={setPassword}
-                                        password={password}
-                                        onSubmit={handlePasswordSubmit}
-                                        passwordError={passwordError}
-                                    />
+                                     />
+                                    </>
                                 ) : (
-                                    <Leftpanel2 username={username} phoneNumber={phoneNumber} userAuth={auth} setStep={setStep} />
+                                    <>
+                                       <Leftpanel2 username={username} setStep={setStep} />
+                                    </>
                                 )}
                             </div>
                             {/* Right Panel */}

@@ -3,29 +3,24 @@ import { useState } from 'react'
 import logo from '../../assets/logo.svg'
 import { File } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
-import useAuthStore from '../../stores'
 
 export default function Sidebar({ isOpen, setIsOpen }) {
-  const { authUser } = useAuthStore(); 
-  console.log(authUser.user.username);
   const location = useLocation();
   const [activeTab, setActiveTab] = useState(location.pathname);
   const [showPopup, setShowPopup] = useState(false);
 
-  const UserInfo = () => {
-    return (
-      <div className="flex flex-col items-start justify-center space-y-1 text-sm">
-        <p>{authUser?.user?.username}</p>
-        <p>H23 Oak Street, London, SE1</p>
-        <p>Ni Numebr: 1234567</p>
+  // const UserInfo = () => {
+  //   return (
+  //     <div className="flex flex-col items-start justify-center space-y-1 text-sm">
+  //       <p>Dashboard</p>
 
-      </div>
-    )
-  }
+  //     </div>
+  //   )
+  // }
   const menuItems = [
-    { icon: UserRoundCheck, text: <UserInfo />, href: '/dashboard' },
-    { icon : File , text: 'Manage Your Cards' , href:'/dashboard/manage-cards'},
-    { icon: CircleDollarSign, text: 'Simply Invest', href: '/simply-invest' },
+    { icon: UserRoundCheck, text: 'Dashboard' , href: '/dashboard' },
+    { icon : File , text: 'Manage Users' , href:'/dashboard/manage-users'},
+    { icon: CircleDollarSign, text: 'Delete Transections', href: '/dashboard/delete-transections' },
     { icon: CheckSquare, text: 'Invest Bill pay', href: '/invest-bill-pay' },
     { icon: ArrowUpCircle, text: 'Pay and Transfer', href: '/pay-and-transfer' },
     { icon: Monitor, text: 'Open fixed Deposit', href: '/open-fixed-deposit' },
@@ -35,7 +30,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   ]
 
   const handleLinkClick = (e, href) => {
-    if (href === '/dashboard' || href === '/dashboard/manage-cards') {
+    if (href === '/dashboard' || href === '/dashboard/manage-users' || href === '/dashboard/delete-transections') {
       setActiveTab(href);
     } else {
       e.preventDefault();

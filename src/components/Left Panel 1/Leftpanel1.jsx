@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Leftpanel1 = ({ username, setUsername, rememberMe, setRememberMe, handleContinue, usernameError }) => {
+const Leftpanel1 = ({ username, setUsername, rememberMe, setRememberMe, handleContinue }) => {
   return (
     <div className='md:ml-6'>
       <h1 className="text-[#333333] text-2xl mb-4 relative tracking-wider">Log on to Business Internet Banking</h1>
@@ -12,7 +12,7 @@ const Leftpanel1 = ({ username, setUsername, rememberMe, setRememberMe, handleCo
       </p>
 
       <form onSubmit={handleContinue}>
-          <div className="mb-4">
+          <div className="mb-6">
               <label className="block text-sm mb-2">Username</label>
               <input
                   type="text"
@@ -20,12 +20,17 @@ const Leftpanel1 = ({ username, setUsername, rememberMe, setRememberMe, handleCo
                   onChange={(e) => setUsername(e.target.value)}
                   className=" p-2 border border-gray-300 focus:border-[#1a1f71] outline-none"
               />
-              <p className='text-red-800 mt-2'>{usernameError}</p>
           </div>
 
+          <div className="mb-6">
+              <label className="block text-sm mb-2">Password</label>
+              <input
+                  type="password"
+                  className="p-2 border border-gray-300 focus:border-[#1a1f71] outline-none"
+              />
+          </div>
 
-
-          <div className="mb-2">
+          <div className="mb-6">
               <label className="flex items-center space-x-2">
                   <input
                       type="checkbox"

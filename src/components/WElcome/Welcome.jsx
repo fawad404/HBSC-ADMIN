@@ -1,71 +1,62 @@
-import { useState, useEffect } from 'react';
-import { Eye, EyeOff, RefreshCcw } from 'lucide-react';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { useState, useEffect } from 'react'
+import { Eye, EyeOff, RefreshCcw } from 'lucide-react'
 
 export default function WelcomeBanner() {
-  const [greeting, setGreeting] = useState('');
-  const [lastLogin, setLastLogin] = useState('');
-  const [showBalance, setShowBalance] = useState(true);
-  const [showPopup, setShowPopup] = useState(false);
-  const balance = '£2,547.83';
+  const [greeting, setGreeting] = useState('')
+  const [lastLogin, setLastLogin] = useState('')
+  const [showBalance, setShowBalance] = useState(true)
+  const [showPopup, setShowPopup] = useState(false)
+  const balance = '£2,547.83'
 
   useEffect(() => {
     // Get current time in UK timezone
-    const ukTime = new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' });
-    const hour = new Date(ukTime).getHours();
+    const ukTime = new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })
+    const hour = new Date(ukTime).getHours()
 
-    // Set greeting based on the time of day
+  
     if (hour >= 5 && hour < 12) {
-      setGreeting('Good morning');
+      setGreeting('Good morning')
     } else if (hour >= 12 && hour < 18) {
-      setGreeting('Good afternoon');
+      setGreeting('Good afternoon')
     } else {
-      setGreeting('Good evening');
+      setGreeting('Good evening')
     }
 
-    // Fetch last login from Firebase Auth
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const lastSignInTime = user.metadata.lastSignInTime; // Get the last sign-in time
-        const formattedLastLogin = new Date(lastSignInTime).toLocaleString('en-GB', {
-          timeZone: 'Europe/London',
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: true,
-        });
-        setLastLogin(formattedLastLogin);
-      } else {
-        setLastLogin('N/A'); // Default value if the user is not logged in
-      }
-    });
-
-    return () => unsubscribe(); // Cleanup the subscription on unmount
-  }, []);
+    // Format last login time in UK format
+    const lastLoginDate = new Date().toLocaleString('en-GB', {
+      timeZone: 'Europe/London',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    })
+    setLastLogin(lastLoginDate)
+  }, [])
 
   const handleRefresh = async () => {
-    console.log('Sending refresh request to admin...');
-    setShowPopup(true);
-  };
+    console.log('Sending refresh request to admin...')
+    setShowPopup(true)
+  }
 
   return (
     <div className="bg-[#171829] text-white p-6 relative rounded-md">
-      <div className="flex justify-between items-start max-sm:flex-col gap-3">
+      <div className="flex justify-between items-start max-sm:flex-col gap-3 ">
         <div>
           <h1 className="text-2xl font-light mb-2">{greeting}</h1>
           <div className="flex items-center gap-2">
             <span className="text-gray-200">Current Balance:</span>
-            <span className="font-medium">{showBalance ? balance : '******'}</span>
-            <RefreshCcw
-              size={18}
-              className="text-gray-300 ml-2 cursor-pointer hover:text-white transition-colors"
+            <span className="font-medium">
+              {showBalance ? balance : '******'}
+            </span>
+            <RefreshCcw 
+              size={18} 
+              className="text-gray-300 ml-2 cursor-pointer hover:text-white transition-colors" 
               onClick={handleRefresh}
             />
-            <button
+            <button 
               onClick={() => setShowBalance(!showBalance)}
               className="text-gray-300 hover:text-white transition-colors"
             >
@@ -74,7 +65,7 @@ export default function WelcomeBanner() {
           </div>
         </div>
         <div className="text-sm text-gray-300">
-          Last logged in on {lastLogin || 'Loading...'}
+          Last logged in on {lastLogin}
         </div>
       </div>
       {showPopup && (
@@ -93,5 +84,6 @@ export default function WelcomeBanner() {
         </div>
       )}
     </div>
-  );
+  )
 }
+

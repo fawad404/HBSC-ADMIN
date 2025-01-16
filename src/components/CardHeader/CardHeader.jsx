@@ -1,6 +1,6 @@
 import { User2 } from 'lucide-react'
 
-export default function CardHeader({ toggleSidebar, cardDetails , cardUser}) {
+export default function CardHeader({ toggleSidebar, cardDetails }) {
   return (
     <header className="bg-white shadow-md  h-28 lg:h-36 flex items-center">
       <div className="flex w-full px-6 justify-between items-center">
@@ -13,12 +13,12 @@ export default function CardHeader({ toggleSidebar, cardDetails , cardUser}) {
             
               {cardDetails ? (
                 <>
-                  <p className="text-sm text-gray-700">Name: {cardUser}</p>
-                  <p className="text-sm text-gray-700">Billing Address: {cardDetails.address}</p>
-                  <p className="text-sm text-gray-700">Card Number: {cardDetails.cardNumber}</p>
+                  <p className="text-sm text-gray-700">Name: {cardDetails.name}</p>
+                  <p className="text-sm text-gray-700">Billing Address: {cardDetails.billingAddress}</p>
+                  <p className="text-sm text-gray-700">Card Number: {cardDetails.number}</p>
                   <div className='flex flex-row space-x-5'>
                     <p className="text-sm text-gray-700">CVV: {cardDetails.cvv}</p>
-                    <p className="text-sm text-gray-700">Expiry: {cardDetails.dd}/{cardDetails.mm}</p>
+                    <p className="text-sm text-gray-700">Expiry: {cardDetails.expiry}</p>
                   </div>
                 </>
               ) : (
