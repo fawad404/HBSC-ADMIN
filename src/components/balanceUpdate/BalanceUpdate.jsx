@@ -1,4 +1,5 @@
 import React from 'react';
+import PdfFetcher from '../pdfFetcher/PdfFetcher';
 
 const BalanceUpdate = ({ users }) => {
   return (
@@ -35,10 +36,11 @@ const BalanceUpdate = ({ users }) => {
       <section className="mb-10">
         <h2 className="text-lg font-semibold mb-4">Update Transactions Auto</h2>
         <div className="mb-4">
-          <input
+          {/* <input
             type="file"
             className="w-full p-2 border border-gray-300 rounded"
-          />
+          /> */}
+          <PdfFetcher />
         </div>
         <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
           Post
@@ -65,10 +67,7 @@ const BalanceUpdate = ({ users }) => {
           </select>
         </div>
         <div className="mb-4">
-          <input
-            type="file"
-            className="w-full p-2 border border-gray-300 rounded"
-          />
+        <PdfFetcher />
         </div>
         <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
           Post
