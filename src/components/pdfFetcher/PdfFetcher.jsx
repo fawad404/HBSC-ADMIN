@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
+import { FileUp, File, Check, X } from 'lucide-react';
 import 'pdfjs-dist/build/pdf.worker.min';
 
 GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
 const PdfFetcher = () => {
   const [transactions, setTransactions] = useState({});
+  const [fileName, setFileName] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState(null); // 'success' | 'error' | null
+  const fileInputRef = useRef(null);
 
   const normalizeText = (text) => {
     return text
@@ -95,42 +100,93 @@ const PdfFetcher = () => {
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const typedArray = new Uint8Array(e.target.result);
-        const pdf = await getDocument(typedArray).promise;
+      setFileName(file.name);
+      setIsUploading(true);
+      setUploadStatus(null);
+      
+      try {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const typedArray = new Uint8Array(e.target.result);
+          const pdf = await getDocument(typedArray).promise;
 
-        let fullText = '';
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const textContent = await page.getTextContent();
-          textContent.items.forEach((item) => (fullText += item.str + ' '));
-        }
+          let fullText = '';
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            textContent.items.forEach((item) => (fullText += item.str + ' '));
+          }
 
-        await extractTransactions(fullText);
-      };
-      reader.readAsArrayBuffer(file);
+          await extractTransactions(fullText);
+          setUploadStatus('success');
+        };
+        reader.readAsArrayBuffer(file);
+      } catch (error) {
+        console.error('Error processing PDF:', error);
+        setUploadStatus('error');
+      } finally {
+        setIsUploading(false);
+      }
     }
   };
 
   return (
-   <>
-      <input type="file" accept=".pdf" onChange={handleFileChange} className="mb-4" />
-      {/* <div className="bg-gray-100 p-4 rounded">
-        <h3 className="font-bold mb-2">Summary:</h3>
-        {transactions.metadata && (
-          <div className="mb-4">
-            <p>Total Transactions: {transactions.metadata.totalTransactions}</p>
-            <p>Total Credit: {transactions.metadata.totalCredit}</p>
-            <p>Total Debit: {transactions.metadata.totalDebit}</p>
-            <p>Net Balance: {transactions.metadata.netBalance}</p>
-            <p>Currencies: {transactions.metadata.currencies.join(', ')}</p>
-          </div>
+    <div className="relative">
+      <input
+        type="file"
+        accept=".pdf"
+        onChange={handleFileChange}
+        ref={fileInputRef}
+        className="hidden"
+      />
+      <div 
+        onClick={() => fileInputRef.current.click()}
+        className={`
+          w-full p-4 border-2 border-dashed rounded-xl
+          flex items-center justify-center gap-3 cursor-pointer
+          transition-all duration-300
+          ${uploadStatus === 'success' 
+            ? 'border-green-500 bg-green-50' 
+            : uploadStatus === 'error'
+              ? 'border-red-500 bg-red-50'
+              : 'border-gray-300 hover:border-red-500 hover:bg-red-50'
+          }
+        `}
+      >
+        {uploadStatus === 'success' ? (
+          <>
+            <Check className="h-5 w-5 text-green-500" />
+            <span className="text-green-600">File uploaded successfully</span>
+          </>
+        ) : uploadStatus === 'error' ? (
+          <>
+            <X className="h-5 w-5 text-red-500" />
+            <span className="text-red-600">Error uploading file</span>
+          </>
+        ) : fileName ? (
+          <>
+            <File className="h-5 w-5 text-gray-400" />
+            <span className="text-gray-600">{fileName}</span>
+          </>
+        ) : (
+          <>
+            <FileUp className="h-5 w-5 text-gray-400" />
+            <span className="text-gray-600">Click to upload PDF file</span>
+          </>
         )}
-        <pre className="mt-4 overflow-auto">{JSON.stringify(transactions, null, 2)}</pre>
-      </div> */}
-    </>
+      </div>
+      
+      {isUploading && (
+        <div className="absolute inset-0 bg-white/80 rounded-xl flex items-center justify-center">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-gray-600">Processing...</span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
 export default PdfFetcher;
+

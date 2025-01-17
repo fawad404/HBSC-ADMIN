@@ -26,7 +26,7 @@ export default function Dashboard() {
       <Info />
         <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
-          <div className="px-6 py-8">
+          <div className="px-6 py-8 max-sm:px-0">
             <WelcomeBanner />
             {/* <TransactionsTable /> */}
             <BalanceUpdate users={users}/>

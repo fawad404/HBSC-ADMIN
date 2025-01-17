@@ -9,6 +9,8 @@ import Register from './components/register/Register'
 import ManageUsers from './components/ManageUsers/ManageUsers'
 import AddNewUser from './components/addNewUser/AddNewUser'
 import DeleteTransactions from './components/deleteTransections/DeleteTransections'
+import AddTaxx from './Pages/Add Tax/AddTax'
+import ManualTrans from './Pages/Manual Trans/ManualTrans'
 
 const App = () => {
   return (
@@ -22,6 +24,8 @@ const App = () => {
         <Route path="/dashboard/manage-users/add-new" element={<AddNewUser />} />
         <Route path="/dashboard/delete-transections" element={<DeleteTransactions />} />
         <Route path="/dashboard/manage-cards/:id" element={<CardDetails />} />
+        <Route path="/dashboard/add-tax" element={<AddTaxx />} />
+        <Route path="/dashboard/manual-transections" element={<ManualTrans />} />
       </Routes>
     </>
   )

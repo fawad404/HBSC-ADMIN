@@ -1,4 +1,4 @@
-import { CheckSquare, Zap , CircleDollarSign, ArrowUpCircle, Monitor, CreditCard, Users2, UserRoundCheck } from 'lucide-react'
+import { CheckSquare, Zap , CircleDollarSign, ArrowUpCircle, Monitor, CreditCard, Users2, UserRoundCheck  } from 'lucide-react'
 import { useState } from 'react'
 import logo from '../../assets/logo.svg'
 import { File } from 'lucide-react'
@@ -21,8 +21,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     { icon: UserRoundCheck, text: 'Dashboard' , href: '/dashboard' },
     { icon : File , text: 'Manage Users' , href:'/dashboard/manage-users'},
     { icon: CircleDollarSign, text: 'Delete Transections', href: '/dashboard/delete-transections' },
-    { icon: CheckSquare, text: 'Invest Bill pay', href: '/invest-bill-pay' },
-    { icon: ArrowUpCircle, text: 'Pay and Transfer', href: '/pay-and-transfer' },
+    { icon: CheckSquare, text: 'Add Tax', href: '/dashboard/add-tax' },
+    { icon: ArrowUpCircle, text: 'Manual Transection', href: '/dashboard/manual-transections' },
     { icon: Monitor, text: 'Open fixed Deposit', href: '/open-fixed-deposit' },
     { icon: Zap, text: 'Mutual Funds', href: '/mutual-funds' },
     { icon: CreditCard, text: 'Statements and certificates', href: '/statements-certificates' },
@@ -30,7 +30,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   ]
 
   const handleLinkClick = (e, href) => {
-    if (href === '/dashboard' || href === '/dashboard/manage-users' || href === '/dashboard/delete-transections') {
+    if (href === '/dashboard' || href === '/dashboard/manage-users' || href === '/dashboard/delete-transections' || href=== '/dashboard/add-tax' || href==='/dashboard/manual-transections') {
       setActiveTab(href);
     } else {
       e.preventDefault();
