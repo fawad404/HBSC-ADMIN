@@ -1,100 +1,178 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PdfFetcher from '../pdfFetcher/PdfFetcher';
-import { 
-  Wallet, 
-  CreditCard, 
-  User, 
-  Upload, 
-  ChevronDown, 
-  Bell,
-  FileText 
-} from 'lucide-react';
 
 const BalanceUpdate = ({ users }) => {
+  const [sortedTransactions, setSortedTransactions] = useState(null);
+  const [userCards, setUserCards] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedCard, setSelectedCard] = useState('');
+  // State to hold the selected user ID
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [userAmount, setUserAmount] = useState(null);
+
+  // Callback function to receive transactions from PdfFetcher
+  const handleTransactionsUpdate = (transactions) => {
+    setSortedTransactions(transactions);
+  };
+
+  const handleUserChangeWT = (e) => {
+    const userId = e.target.value;
+
+    // Find the selected user and their cards
+    const user = users.find((u) => u._id === userId);
+    setSelectedUser(user.username);
+
+    // Set the cards for the selected user (replace `cards` with your data structure)
+    setUserCards(user ? user.cards : []);
+    
+  };
+  
+  const handleCardChange = (e) => {
+    const cardNumber = e.target.value;
+    setSelectedCard(cardNumber);
+    
+  };
+  // Handle user selection change
+  const handleUserChange = (event) => {
+    const userId = event.target.value;
+    setSelectedUserId(userId);
+   // console.log('Selected User ID:', userId);
+  };
+  console.log(userCards? userCards : []);
+  const handleInputChange = (event) => {
+    const amount = event.target.value;
+    setUserAmount(amount);
+    //console.log('Entered amount is:', amount);
+  };
+
+  const addBalance = async() => {
+    if(selectedUserId && userAmount){
+      try {
+      //  setLoading(true);
+        const response = await fetch('https://hsbc-backend.vercel.app/api/v1/accounts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: selectedUserId, // Ensure cardNumber is available
+            amount: userAmount,
+          }),
+        });
+        const data = await response.json();
+        console.log(data);
+        //const transactions = data.transections || [];
+        //setTransactions(transactions);
+        //setLoading(false);
+      } catch (error) {
+        //setError(error.message);
+        //setLoading(false);
+      }
+    }
+  }
+
+  const handlePostClick = async () => {
+    if (sortedTransactions) {
+      const sortedByDate = Object.entries(sortedTransactions).sort(
+        ([, txnA], [, txnB]) => new Date(txnB.date) - new Date(txnA.date)
+      );
+
+      const sortedTransactionsByDate = Object.fromEntries(sortedByDate);
+
+      console.log('Sorted transactions by date:', sortedTransactionsByDate);
+
+      const response = await fetch('https://hsbc-backend.vercel.app/api/v1/transections', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          transactions: Object.values(sortedTransactionsByDate),
+          cardHolderName: selectedUser,
+          cardNumber: selectedCard,
+        }),
+      });
+
+      const data = await response.json();
+      console.log('API Response:', data);
+    }
+  };
+
   return (
-    <div className="p-6 bg-white min-h-screen">
-      {/* Update User Balance */}
-      <section className="mb-10 bg-white p-8 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.1)]">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-          <Wallet className="w-6 h-6 text-red-600" />
-          Update User Balance
-        </h2>
-        <div className="space-y-4">
-          <div className="relative">
-            <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <select className="w-full pl-12 pr-4 py-4 bg-gray-50 text-gray-700 rounded-xl border border-gray-200 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-300">
-              <option>Select User</option>
-              {users.map((user) => (
-                <option key={user.id} value={user.id}>{user.name}</option>
-              ))}
-            </select>
-            
-          </div>
+    <div className="p-10 bg-gray-50 min-h-screen">
+      <section className="mb-10">
+        <h2 className="text-lg font-semibold mb-4">Update User Balance</h2>
+        <div className="flex space-x-4 mb-4">
+          <select
+            className="w-1/2 p-2 border border-gray-300 rounded"
+            onChange={handleUserChange}
+          >
+            <option value="">Select User</option>
+            {users.map((user) => (
+              <option key={user._id} value={user._id}>
+                {user.username}
+              </option>
+            ))}
+          </select>
           <input
             type="text"
-            className="w-full pl-12 pr-4 py-4 bg-gray-50 text-gray-700 rounded-xl border border-gray-200 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-300"
-            placeholder="Enter New Balance"
+            className="w-1/2 p-2 border border-gray-300 rounded"
+            placeholder="Enter New Balance here"
+            onChange={handleInputChange}
           />
         </div>
-        <div className="grid grid-cols-2 gap-4 mt-6">
-          <button className="p-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-red-500/25 flex items-center justify-center gap-2">
-            <Upload className="h-5 w-5" />
+        <div className="flex space-x-4">
+          <button 
+          onClick={addBalance}
+          className="w-1/2 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
             Post
           </button>
-          <button className="p-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-red-500/25 flex items-center justify-center gap-2">
-            <Bell className="h-5 w-5" />
+          <button className="w-1/2 bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
             Post & Notify
           </button>
         </div>
       </section>
 
-      {/* Update Transactions Auto */}
-      <section className="mb-10 bg-white p-8 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.1)]">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-          <FileText className="w-6 h-6 text-red-600" />
-          Update Transactions Auto
-        </h2>
-        <div className="mb-6">
-          <PdfFetcher />
-        </div>
-        <button className="w-full p-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-red-500/25 flex items-center justify-center gap-2">
-          <Upload className="h-5 w-5" />
+      <section className="mb-10">
+        <h2 className="text-lg font-semibold mb-4">Update Transactions Auto</h2>
+        <PdfFetcher onTransactionsUpdate={handleTransactionsUpdate} />
+        <button
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          onClick={handlePostClick}
+        >
           Post
         </button>
       </section>
 
-      {/* Update Transactions Manual */}
-      <section className="bg-white p-8 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.1)]">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-          <CreditCard className="w-6 h-6 text-red-600" />
-          Update Transactions Manual
-        </h2>
-        <div className="space-y-4 mb-6">
-          <div className="relative">
-            <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <select className="w-full pl-12 pr-4 py-4 bg-gray-50 text-gray-700 rounded-xl border border-gray-200 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-300">
-              <option>Select User</option>
-              {users.map((user) => (
-                <option key={user.id} value={user.id}>{user.name}</option>
-              ))}
-            </select>
-            
-          </div>
-          <div className="relative">
-            <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <select className="w-full pl-12 pr-4 py-4 bg-gray-50 text-gray-700 rounded-xl border border-gray-200 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-300">
-              <option>Select User's card</option>
-              <option value="card1">Card 1</option>
-              <option value="card2">Card 2</option>
-            </select>
-            
-          </div>
+      <section>
+        <h2 className="text-lg font-semibold mb-4">Update Transactions Manual</h2>
+        <div className="flex space-x-4 mb-4">
+          <select
+          onChange={handleUserChangeWT}
+           className="w-1/2 p-2 border border-gray-300 rounded">
+            <option>Select User</option>
+            {users.map((user) => (
+              <option key={user._id} value={user._id}>
+                {user.username}
+              </option>
+            ))}
+          </select>
+          <select
+           onChange={handleCardChange}
+           className="w-1/2 p-2 border border-gray-300 rounded">
+            <option>Select User's card</option>
+            {userCards.map((card, index) => (
+          <option key={index} value={card.cardNumber}>
+            {card.cardNumber}
+          </option>
+        ))}
+          </select>
         </div>
-        <div className="mb-6">
-          <PdfFetcher />
-        </div>
-        <button className="w-full p-4 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transform hover:scale-[1.02] transition-all duration-300 shadow-lg hover:shadow-red-500/25 flex items-center justify-center gap-2">
-          <Upload className="h-5 w-5" />
+        <PdfFetcher onTransactionsUpdate={handleTransactionsUpdate} />
+        <button
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          onClick={handlePostClick}
+        >
           Post
         </button>
       </section>

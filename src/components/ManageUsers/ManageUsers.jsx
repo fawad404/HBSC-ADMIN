@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import Sidebar from "../Sidebar/Sidebar";
 import { useNavigate } from "react-router-dom";
@@ -7,21 +7,73 @@ import { Users, Eye, Edit, Trash2, UserPlus, Lock, Unlock } from 'lucide-react';
 function ManageUsers() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const navigate = useNavigate();
-    const [users, setUsers] = useState([
-        { email: 'team49T@senergysolutions.co.uk', isBlocked: false },
-        { email: 'User49T@senergysolutions.co.uk', isBlocked: true },
-    ]);
+    const [users, setUsers] = useState([]);
+
+    useEffect(() => {
+    
+        const fetchUsers = async () => {
+          
+            try {
+             // setLoading(true);
+              const response = await fetch(`https://hsbc-backend.vercel.app/api/v1/users`);
+               
+              let data = await response.json();
+              data = data.getAllUsers;
+              console.log(data);
+              setUsers(data);
+             
+            //  setFilteredTransactions(data.accounts);
+            //   setLoading(false);
+            } catch (error) {
+            //   setError(error.message);
+            //   setLoading(false);
+            }
+          
+        };
+        fetchUsers();
+        
+      }, []);
 
     const handleAddNew = () => {
         navigate("/dashboard/manage-users/add-new");
     };
 
     const toggleBlockStatus = (email) => {
-        setUsers(users.map(user => 
-            user.email === email ? { ...user, isBlocked: !user.isBlocked } : user
+        // Update the local state for users
+        setUsers(users.map(user =>
+            user.email === email ? { ...user, blocked: !user.blocked } : user
         ));
+    
+        // Find the user by email to get their ID and updated status
+        const userToUpdate = users.find(user => user.email === email);
+        if (userToUpdate) {
+            const updatedData = { blocked: !userToUpdate.blocked }; // Toggle the blocked status
+            updatedUserStatus(userToUpdate._id, updatedData); // Pass the userId and updatedData
+        }
     };
-
+    
+    const updatedUserStatus = async (userId, updatedData) => {
+        try {
+            const response = await fetch(`https://hsbc-backend.vercel.app/api/v1/users/${userId}`, {
+                method: 'PUT', // Specify the HTTP method
+                headers: {
+                    'Content-Type': 'application/json', // Set the appropriate content type
+                },
+                body: JSON.stringify(updatedData), // Send the updated data as a JSON string
+            });
+    
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+    
+            const data = await response.json(); // Parse the JSON response
+            console.log('User updated successfully:', data);
+    
+        } catch (error) {
+            console.error('Error updating user:', error.message);
+        }
+    };
+    
     return (
         <>
             <Helmet>
@@ -66,11 +118,11 @@ function ManageUsers() {
                                                             <button 
                                                                 onClick={() => toggleBlockStatus(user.email)}
                                                                 className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors
-                                                                    ${user.isBlocked ? 
+                                                                    ${user.blocked ? 
                                                                     'text-red-500 hover:text-red-600 hover:bg-red-50' : 
                                                                     'text-green-500 hover:text-green-600 hover:bg-green-50'}`}
                                                             >
-                                                                {user.isBlocked ? (
+                                                                {user.blocked ? (
                                                                     <>
                                                                         <Lock className="w-4 h-4" />
                                                                         <span>Blocked</span>

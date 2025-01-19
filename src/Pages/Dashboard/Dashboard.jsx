@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet'
 import Header from '../../components/Dashbooard Header/Header'
 import Sidebar from '../../components/Sidebar/Sidebar'
@@ -7,12 +7,27 @@ import Info from '../../components/MobilebankingInfo/Info'
 import BalanceUpdate from '../../components/balanceUpdate/BalanceUpdate'
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const users = [
-    { id: 1, name: 'Alice' },
-    { id: 2, name: 'Bob' },
-    { id: 3, name: 'Charlie' },
-  ];
+  const [users, setUsers] = useState([]);
+ 
+  useEffect(() => {
+    const fetchUsers = async () => {
+        try {
+          const response = await fetch(`https://hsbc-backend.vercel.app/api/v1/users`);
+          let data = await response.json();
+          data = data.getAllUsers;
+          console.log(data);
+          setUsers(data);
+        //  setFilteredTransactions(data.accounts);
+        //   setLoading(false);
+        } catch (error) {
+        //   setError(error.message);
+        //   setLoading(false);
+        }
+      
+    };
+    fetchUsers();
+    
+  }, []);
 
   return (
     <>

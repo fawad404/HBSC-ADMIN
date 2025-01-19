@@ -1,16 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
-import { FileUp, File, Check, X } from 'lucide-react';
 import 'pdfjs-dist/build/pdf.worker.min';
+import { v4 as uuidv4 } from 'uuid';
 
 GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
-const PdfFetcher = () => {
+const PdfFetcher = ({ onTransactionsUpdate }) => {
   const [transactions, setTransactions] = useState({});
-  const [fileName, setFileName] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState(null); // 'success' | 'error' | null
-  const fileInputRef = useRef(null);
+  const staticTransactionDate = ""; // Define your static transaction ID here
+  const staticDescription = "";
+  const staticAmount = "";
 
   const normalizeText = (text) => {
     return text
@@ -20,173 +19,168 @@ const PdfFetcher = () => {
   };
 
   const parseAmount = (amountStr) => {
-    // Remove any currency symbols and spaces
     const cleanAmount = amountStr.replace(/[^0-9.-]/g, '');
     return parseFloat(cleanAmount);
   };
 
   const extractTransactions = async (pdfText) => {
-    // Normalize the text first
+    const normalizeText = (text) => text.replace(/\s+/g, ' ').trim();
+  
     const normalizedText = normalizeText(pdfText);
-    
-    // More precise regex pattern
     const regex = /([A-Za-z]+\s+\d{1,2},\s*\d{4})\s*([A-Z0-9\*\-\s\.]+?)\s+([-+]?\d*[,.]?\d+\.?\d*)\s*(USD|GBP|PKR)/gi;
     const matches = Array.from(normalizedText.matchAll(regex));
-
+  
     const transactionsData = {
       metadata: {
         totalTransactions: 0,
         totalCredit: 0,
         totalDebit: 0,
         currencies: new Set(),
-        processingDate: new Date().toISOString()
+        processingDate: new Date().toISOString(),
       },
-      transactions: {}
+      transactions: {},
     };
-
-    matches.forEach((match, index) => {
+  
+    let transactionFound = false;
+  
+    for (let index = 0; index < matches.length; index++) {
+      const match = matches[index];
       const rawAmount = match[3];
-      const amount = parseAmount(rawAmount);
-      const date = match[1].trim();
+      const amount = parseFloat(rawAmount.replace(/[^0-9.-]/g, ''));
+      const date = match[1].trim(); 
       const description = match[2].trim();
       const currency = match[4].toUpperCase();
+  
+      if (isNaN(amount)) continue;
+  
+      const transactionId = `TXN_${date.replace(/[^A-Za-z0-9]/g, '')}_${index}`;
 
-      // Skip invalid amounts
-      if (isNaN(amount)) {
-        console.warn(`Skipped invalid amount: ${rawAmount} for transaction: ${description}`);
-        return;
-      }
-
-      const transactionId = `TXN_${date.replace(/[^0-9]/g, '')}_${index}`;
-
-      // Update metadata
+            // Define match conditions based on the static fields
+            // const isDateMatch = staticTransactionDate && date === staticTransactionDate;  // Match if staticTransactionDate is not empty
+            // const isDescriptionMatch = staticDescription && description.includes(staticDescription);  // Match if staticDescription is provided
+            // const isAmountMatch = staticAmount && amount === parseFloat(staticAmount);  // Match if staticAmount is provided
+        
+            // // Case 1: Match all fields
+            // if (isDateMatch && isDescriptionMatch && isAmountMatch && !transactionFound) {
+            //   console.log("Transaction found (all fields match):", { date, description, amount, currency });
+            //   transactionFound = true;
+            //   break;  // Stop after finding the match
+            // }
+        
+            // // Case 2: If only Date and Amount are provided and match
+            // if ((staticTransactionDate && isDateMatch || !staticTransactionDate) &&
+            //     (staticAmount && isAmountMatch || !staticAmount) &&
+            //     !transactionFound) {
+            //   console.log("Transaction found (Date and Amount match):", { date, description, amount, currency });
+            //   transactionFound = true;
+            //   break;
+            // }
+        
+            // // Case 3: If only Description and Amount are provided and match
+            // if ((staticDescription && isDescriptionMatch || !staticDescription) &&
+            //     (staticAmount && isAmountMatch || !staticAmount) &&
+            //     !transactionFound) {
+            //   console.log("Transaction found (Description and Amount match):", { date, description, amount, currency });
+            //   transactionFound = true;
+            //   break;
+            // }
+        
+            // // Case 4: If only Date and Description are provided and match
+            // if ((staticTransactionDate && isDateMatch || !staticTransactionDate) &&
+            //     (staticDescription && isDescriptionMatch || !staticDescription) &&
+            //     !transactionFound) {
+            //   console.log("Transaction found (Date and Description match):", { date, description, amount, currency });
+            //   transactionFound = true;
+            //   break;
+            // }
+  
       transactionsData.metadata.totalTransactions++;
       transactionsData.metadata.currencies.add(currency);
-      
-      if (amount >= 0) {
-        transactionsData.metadata.totalCredit += amount;
-      } else {
-        transactionsData.metadata.totalDebit += Math.abs(amount);
-      }
-
-      // Store transaction with additional validation
+      if (amount >= 0) transactionsData.metadata.totalCredit += amount;
+      else transactionsData.metadata.totalDebit += Math.abs(amount);
+  
       transactionsData.transactions[transactionId] = {
-        date: date,
-        description: description,
-        amount: Number(amount.toFixed(2)), // Ensure 2 decimal places
+        date,
+        description,
+        amount: Number(amount.toFixed(2)),
         type: amount >= 0 ? 'credit' : 'debit',
-        currency: currency,
+        currency,
         rawText: match[0].trim(),
-        processingDetails: {
-          originalAmount: rawAmount,
-          normalizedAmount: amount,
-          isRounded: Math.abs(amount % 1) < 0.01
-        }
       };
-    });
-
-    // Convert Set to Array and sort currencies
+    }
+  
     transactionsData.metadata.currencies = Array.from(transactionsData.metadata.currencies).sort();
-    
-    // Add summary calculations
     transactionsData.metadata.totalCredit = Number(transactionsData.metadata.totalCredit.toFixed(2));
     transactionsData.metadata.totalDebit = Number(transactionsData.metadata.totalDebit.toFixed(2));
     transactionsData.metadata.netBalance = Number((transactionsData.metadata.totalCredit - transactionsData.metadata.totalDebit).toFixed(2));
+  
+//     const sortedTransactions = Object.entries(transactionsData.transactions)
+//     .sort(([idA], [idB]) => idA.localeCompare(idB)); // Sort lexicographically based on transactionId
 
-    setTransactions(transactionsData);
-    console.log('Parsed Transactions:', transactionsData);
+//  // transactionsData.transactions = Object.fromEntries(sortedTransactions);
+  
+//     transactionsData.transactions = Object.fromEntries(sortedTransactions);
+
+    // Send sorted transactions to the parent component
+
+    const sortedTransactions = Object.entries(transactionsData.transactions)
+    .sort(([, a], [, b]) => new Date(b.date) - new Date(a.date));
+
+  // Convert sorted array back to object
+  transactionsData.transactions = Object.fromEntries(sortedTransactions);
+
+  // Log sorted transactions for verification
+  setTransactions(transactionsData);
+  console.log("Sorted Transactions:", transactionsData.transactions);
+    if (onTransactionsUpdate) {
+      onTransactionsUpdate(transactionsData.transactions);
+    }
+
   };
 
   const handleFileChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      setFileName(file.name);
-      setIsUploading(true);
-      setUploadStatus(null);
-      
-      try {
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          const typedArray = new Uint8Array(e.target.result);
-          const pdf = await getDocument(typedArray).promise;
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const typedArray = new Uint8Array(e.target.result);
+        const pdf = await getDocument(typedArray).promise;
 
-          let fullText = '';
-          for (let i = 1; i <= pdf.numPages; i++) {
-            const page = await pdf.getPage(i);
-            const textContent = await page.getTextContent();
-            textContent.items.forEach((item) => (fullText += item.str + ' '));
-          }
+        let fullText = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          textContent.items.forEach((item) => (fullText += item.str + ' '));
+        }
 
-          await extractTransactions(fullText);
-          setUploadStatus('success');
-        };
-        reader.readAsArrayBuffer(file);
-      } catch (error) {
-        console.error('Error processing PDF:', error);
-        setUploadStatus('error');
-      } finally {
-        setIsUploading(false);
-      }
+        await extractTransactions(fullText);
+      };
+      reader.readAsArrayBuffer(file);
     }
   };
 
+  useEffect(() => {
+    console.log('Updated Transactions:', transactions);
+  }, [transactions]);
+
   return (
-    <div className="relative">
-      <input
-        type="file"
-        accept=".pdf"
-        onChange={handleFileChange}
-        ref={fileInputRef}
-        className="hidden"
-      />
-      <div 
-        onClick={() => fileInputRef.current.click()}
-        className={`
-          w-full p-4 border-2 border-dashed rounded-xl
-          flex items-center justify-center gap-3 cursor-pointer
-          transition-all duration-300
-          ${uploadStatus === 'success' 
-            ? 'border-green-500 bg-green-50' 
-            : uploadStatus === 'error'
-              ? 'border-red-500 bg-red-50'
-              : 'border-gray-300 hover:border-red-500 hover:bg-red-50'
-          }
-        `}
-      >
-        {uploadStatus === 'success' ? (
-          <>
-            <Check className="h-5 w-5 text-green-500" />
-            <span className="text-green-600">File uploaded successfully</span>
-          </>
-        ) : uploadStatus === 'error' ? (
-          <>
-            <X className="h-5 w-5 text-red-500" />
-            <span className="text-red-600">Error uploading file</span>
-          </>
-        ) : fileName ? (
-          <>
-            <File className="h-5 w-5 text-gray-400" />
-            <span className="text-gray-600">{fileName}</span>
-          </>
-        ) : (
-          <>
-            <FileUp className="h-5 w-5 text-gray-400" />
-            <span className="text-gray-600">Click to upload PDF file</span>
-          </>
-        )}
-      </div>
-      
-      {isUploading && (
-        <div className="absolute inset-0 bg-white/80 rounded-xl flex items-center justify-center">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-gray-600">Processing...</span>
+    <>
+      <input type="file" accept=".pdf" onChange={handleFileChange} className="mb-4" />
+      <div className="bg-gray-100 p-4 rounded">
+        <h3 className="font-bold mb-2">Summary:</h3>
+        {transactions.metadata && (
+          <div className="mb-4">
+            <p>Total Transactions: {transactions.metadata.totalTransactions}</p>
+            <p>Total Credit: {transactions.metadata.totalCredit}</p>
+            <p>Total Debit: {transactions.metadata.totalDebit}</p>
+            <p>Net Balance: {transactions.metadata.netBalance}</p>
+            <p>Currencies: {transactions.metadata.currencies.join(', ')}</p>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+        <pre className="mt-4 overflow-auto">{JSON.stringify(transactions, null, 2)}</pre>
+      </div>
+    </>
   );
 };
 
 export default PdfFetcher;
-
