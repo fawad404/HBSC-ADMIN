@@ -28,7 +28,7 @@ function AddNewUser() {
       </Helmet>
       <div className="flex h-screen bg-gray-100 font-hsbc">
         <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-        <div className="flex-1 flex flex-col ">
+        <div className="flex-1 flex flex-col overflow-auto">
           <div className="min-h-screen p-8 bg-white">
             <h1 className="text-2xl font-bold text-[#F00000] mb-5">
               Add New User

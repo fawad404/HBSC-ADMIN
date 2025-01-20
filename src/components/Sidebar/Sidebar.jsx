@@ -39,7 +39,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   };
 
   return (
-    <div className={`${isOpen ? 'fixed inset-0' : 'hidden'} w-[75%] md:w-[40%] lg:block lg:w-72 bg-[#171829] text-white border-r border-[#ffffff12] z-50`}>
+    <div className={`${isOpen ? 'fixed inset-0' : 'hidden'} w-[75%] md:w-[40%] lg:block lg:w-72 bg-[#171829] text-white border-r border-[#ffffff12] z-50 h-screen`}>
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between h-32 px-6 border-b border-gray-200">
           <Link to='/'>

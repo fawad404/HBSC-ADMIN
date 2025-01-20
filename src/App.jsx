@@ -11,6 +11,9 @@ import AddNewUser from './components/addNewUser/AddNewUser'
 import DeleteTransactions from './components/deleteTransections/DeleteTransections'
 import AddTaxx from './Pages/Add Tax/AddTax'
 import ManualTrans from './Pages/Manual Trans/ManualTrans'
+import ViewUser from './components/View User/ViewUser'
+import EditUser from './components/Edit User/Edituser'
+
 
 const App = () => {
   return (
@@ -26,6 +29,8 @@ const App = () => {
         <Route path="/dashboard/manage-cards/:id" element={<CardDetails />} />
         <Route path="/dashboard/add-tax" element={<AddTaxx />} />
         <Route path="/dashboard/manual-transections" element={<ManualTrans />} />
+        <Route path="/dashboard/view-user/:id" element={<ViewUser />} />
+        <Route path="/dashboard/edit-user/:id" element={<EditUser />} />
       </Routes>
     </>
   )

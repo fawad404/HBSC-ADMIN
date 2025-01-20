@@ -37,7 +37,12 @@ function ManageUsers() {
     const handleAddNew = () => {
         navigate("/dashboard/manage-users/add-new");
     };
-
+    const handleViewUser = (id) => {
+        navigate(`/dashboard/view-user/${id}`);
+    };
+    const handleEditUser = (id) => {
+        navigate(`/dashboard/edit-user/${id}`);
+    };      
     const toggleBlockStatus = (email) => {
         // Update the local state for users
         setUsers(users.map(user =>
@@ -111,7 +116,9 @@ function ManageUsers() {
                                                     </td>
                                                     <td className="px-6 py-4 w-1/2">
                                                         <div className="flex items-center justify-start space-x-8">
-                                                            <button className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-[#F00000] transition-colors rounded-md hover:bg-red-50">
+                                                           
+                                                            <button onClick={() => handleViewUser(user._id)}
+                                                             className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-[#F00000] transition-colors rounded-md hover:bg-red-50">
                                                                 <Eye className="w-4 h-4" />
                                                                 <span>View</span>
                                                             </button>
@@ -134,7 +141,8 @@ function ManageUsers() {
                                                                     </>
                                                                 )}
                                                             </button>
-                                                            <button className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-[#F00000] transition-colors rounded-md hover:bg-red-50">
+                                                            <button onClick={() => handleEditUser(user._id)}
+                                                             className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-[#F00000] transition-colors rounded-md hover:bg-red-50">
                                                                 <Edit className="w-4 h-4" />
                                                                 <span>Edit</span>
                                                             </button>
